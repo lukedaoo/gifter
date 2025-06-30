@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+const ASCII_CHARS = "$@%&#*+/\\|()1{}[]?-_+~<>!;:,\"^`'.                                                 "
+
 func execute(filePath string, styles string) {
 	fmt.Printf("Processing file: %s\n", filePath)
 
@@ -46,8 +48,6 @@ func execute(filePath string, styles string) {
 	displayGIF(g)
 }
 
-const asciiChars = "$@%&#*+/\\|()1{}[]?-_+~<>!;:,\"^`'. "
-
 func imageToASCII(img image.Image, width, height int) string {
 	bounds := img.Bounds()
 	imgWidth, imgHeight := bounds.Max.X, bounds.Max.Y
@@ -71,8 +71,8 @@ func imageToASCII(img image.Image, width, height int) string {
 
 			c := color.GrayModel.Convert(img.At(srcX, srcY)).(color.Gray)
 			intensity := math.Pow(float64(c.Y)/255.0, gamma)
-			charIndex := int(intensity * float64(len(asciiChars)-1))
-			output += string(asciiChars[charIndex])
+			charIndex := int(intensity * float64(len(ASCII_CHARS)-1))
+			output += string(ASCII_CHARS[charIndex])
 		}
 		output += "\n"
 	}
