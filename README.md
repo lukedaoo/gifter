@@ -37,7 +37,7 @@ Replace `<file_path.gif>` with the path to your GIF file.
 - Support for more ASCII art styles (e.g., shaded, bordered, blocky)
 - Load images directly from the internet
 - Support for additional image formats (JPEG, PNG, WebP, etc.)
-- Color mode for more vibrant and expressive ASCII output
+- [x] Color mode for more vibrant and expressive ASCII output
 
 ---
 
