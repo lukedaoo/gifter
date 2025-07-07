@@ -5,15 +5,17 @@ run:
 		echo "Usage: make run FILE=example2.gif"; \
 		exit 1; \
 	fi
-	go run . -w 80 -h 40 $(FILE)
+	@SFLAG=$$( [ -n "$(S)" ] && echo "-s $(S)" ); \
+	go run . -w 80 -h 40 $$SFLAG $(FILE)
 run-c:
 	@if [ -z "$(FILE)" ]; then \
-		echo "Usage: make run FILE=example2.gif"; \
+		echo "Usage: make run-c FILE=example2.gif [S=style]"; \
 		exit 1; \
 	fi
-	go run . -w 80 -h 40 -c $(FILE)
+	@SFLAG=$$( [ -n "$(S)" ] && echo "-s $(S)" ); \
+	go run . -w 80 -h 40 -c $$SFLAG $(FILE)
 run-1:
-	go run . -w 80 -h 40 -c example.gif 
+	go run . -w 80 -h 40 -c -s shaded example.gif 
 run-2:
 	go run . -w 80 -h 40 -c example2.gif
 run-help:

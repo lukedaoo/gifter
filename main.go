@@ -77,7 +77,7 @@ func printHelp() {
 	fmt.Println("  gifter [options] <file_path>.gif")
 	fmt.Println()
 	fmt.Println("Options:")
-	fmt.Println("  -s, --styles=\"styles\" Styles to use (optional)")
+	fmt.Println("  -s, --styles=\"styles\" Styles to use (optional) [normal, ascii2, shaded, bordered, blocky]")
 	fmt.Println("  -w, --width=WIDTH      Set output width (optional, default: 90)")
 	fmt.Println("  -h, --height=HEIGHT    Set output height (optional, default: 90)")
 	fmt.Println("  -c, --color            Enable color output (optional, default: true)")

@@ -13,9 +13,13 @@ import (
 	"time"
 )
 
-const GRAD = " .,:;ilwW#@$%"
-const GRAD_70 = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\" +
-	"|()1{}[]?-_+~<>i!lI;:,\"^`'. "
+const (
+	GRAD_NORMAL   = " .,:;ilwW#@$%"
+	GRAD_ASCII2   = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\\|()1{}[]?-_+~<>i!lI;:,\"^`'. "
+	GRAD_SHADED   = " .:;░▒▓█"
+	GRAD_BORDERED = " .:-┼┤├┴┬┘└┐┌│"
+	GRAD_BLOCKY   = " .:;▋▊▉█"
+)
 
 type Context struct {
 	Width  int
@@ -23,53 +27,75 @@ type Context struct {
 	Gamma  float64
 	Color  bool
 	Styles string
-	Grad   string
+	Grad   []rune // gradient for unicode character
 }
 
 func ContextFromOptions(opts Options) Context {
+	var grad []rune
+	gamma := 1.0
+
+	switch opts.Styles {
+	case "normal":
+		grad = []rune(GRAD_NORMAL)
+	case "shaded":
+		grad = []rune(GRAD_SHADED)
+	case "bordered":
+		grad = []rune(GRAD_BORDERED)
+	case "blocky":
+		grad = []rune(GRAD_BLOCKY)
+	case "ascii2":
+		grad = []rune(GRAD_ASCII2)
+		gamma = 2.2
+	default:
+		fmt.Printf("Warning: unknown style %q, defaulting to ascii2\n", opts.Styles)
+		grad = []rune(GRAD_ASCII2)
+		gamma = 2.2
+	}
+
 	return Context{
 		Width:  opts.Width,
 		Height: opts.Height,
 		Color:  opts.Color,
 		Styles: opts.Styles,
-		Grad:   GRAD,
+		Grad:   grad,
+		Gamma:  gamma,
 	}
 }
 
 func execute(opts Options) {
 	fmt.Printf("Processing file: %s\n", opts.FilePath)
+	fmt.Printf("Input dimensions: width=%d, height=%d\n", opts.Width, opts.Height)
+	fmt.Printf("Color output: %v\n", opts.Color)
 
-	if opts.Styles != "ascii2" {
-		fmt.Printf("No supported style: %s\n. Using ascii2", opts.Styles)
+	if opts.Styles != "" {
+		fmt.Printf("Using style: %s\n", opts.Styles)
+	} else {
+		fmt.Println("No style provided, using default")
 	}
+
+	fmt.Printf("Processing started for file: %s with style: %s\n", opts.FilePath, opts.Styles)
 
 	file, err := os.Open(opts.FilePath)
 	if err != nil {
-		log.Fatalf("Error opening file: %v", err)
+		log.Fatalf("Error opening file %s: %v", opts.FilePath, err)
 	}
 	defer file.Close()
 
 	fileInfo, err := file.Stat()
 	if err != nil {
-		log.Fatalf("Error getting file info from opened file: %v", err)
+		log.Fatalf("Error getting file info for %s: %v", opts.FilePath, err)
 	}
 
 	fileSize := fileInfo.Size()
-	fmt.Printf("The size of %s is %d bytes.\n", opts.FilePath, fileSize)
+	fmt.Printf("File size of %s: %d bytes\n", opts.FilePath, fileSize)
 
 	g, err := gif.DecodeAll(file)
 	if err != nil {
-		log.Fatalf("Error decoding GIF: %v", err)
+		log.Fatalf("Error decoding GIF %s: %v", opts.FilePath, err)
 	}
 
-	context := ContextFromOptions(opts)
-	fmt.Println(context)
-	if context.Styles == "ascii2" {
-		context.Gamma = 2.2
-		context.Grad = GRAD_70
-		displayGIF(g, context)
-	}
-
+	ctx := ContextFromOptions(opts)
+	displayGIF(g, ctx)
 }
 
 func imageToASCII(img image.Image, context Context) string {
@@ -109,7 +135,8 @@ func imageToASCII(img image.Image, context Context) string {
 			gray = math.Pow(gray/255.0, context.Gamma)
 
 			idx := int(gray*float64(len(context.Grad)-1) + 0.5) // round
-			ch := context.Grad[idx]
+			runes := []rune(context.Grad)
+			ch := runes[idx]
 
 			if context.Color {
 				sb.WriteString(fmt.Sprintf("\033[38;2;%d;%d;%dm%c\033[0m",
