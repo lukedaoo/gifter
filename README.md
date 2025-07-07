@@ -17,13 +17,15 @@
 ### Run from source:
 
 ```bash
-make run-1
+make run file_path.gif # grayscale
+make run-c file_path.gif # color
 ```
 
 ### Or run after building:
 
 ```bash
 ./gifter <file_path.gif>
+./gifter --help
 ```
 
 Replace `<file_path.gif>` with the path to your GIF file.
